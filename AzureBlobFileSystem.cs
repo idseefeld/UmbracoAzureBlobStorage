@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.IO;
+using Umbraco.Core.Logging;
 
 namespace idseefeld.de.UmbracoAzure {
 	public class AzureBlobFileSystem : IFileSystem {
@@ -48,13 +49,15 @@ namespace idseefeld.de.UmbracoAzure {
 		public void AddFile(string path, Stream stream, bool overrideIfExists)
 		{
 			var fileExists = FileExists(path);
-			if (fileExists && !overrideIfExists) throw new InvalidOperationException(string.Format("A file at path '{0}' already exists", path));
+			if (fileExists && !overrideIfExists)
+			{
+				LogHelper.Warn<AzureBlobFileSystem>(string.Format("A file at path '{0}' already exists", path));
+			}
 			AddFile(path, stream);
 		}
 
 		public void AddFile(string path, Stream stream)
 		{
-			//ToDo: map relative path to url
 			if (!path.StartsWith(RootUrl))
 			{
 				path = RootUrl + path.Replace('\\', '/');
@@ -115,7 +118,6 @@ namespace idseefeld.de.UmbracoAzure {
 
 		public string GetFullPath(string path)
 		{
-			//ToDo: check for RootUrl path is irrelevant
 			string rVal = !path.StartsWith(RootUrl)
 				 ? Path.Combine(RootUrl, path)
 				 : path;
@@ -129,13 +131,11 @@ namespace idseefeld.de.UmbracoAzure {
 
 		public string GetRelativePath(string fullPathOrUrl)
 		{
-			//ToDo: check for url. path is irrelevant
 			var relativePath = fullPathOrUrl;
 			if (!fullPathOrUrl.StartsWith("http"))
 			{
 				fullPathOrUrl
 				 .TrimStart(_rootUrl)
-					//.TrimStart(MediaContainer.Name)
 				 .Replace('/', Path.DirectorySeparatorChar)
 				 .TrimStart(Path.DirectorySeparatorChar);
 			}
@@ -145,7 +145,6 @@ namespace idseefeld.de.UmbracoAzure {
 		public string GetUrl(string path)
 		{
 			string rVal = path;
-			//ToDo: check for url. path is irrelevant
 			if (!path.StartsWith("http"))
 			{
 				rVal = RootUrl.TrimEnd("/") + "/" + path
@@ -181,7 +180,6 @@ namespace idseefeld.de.UmbracoAzure {
 		}
 		private void DeleteDirectoryInBlob(string path)
 		{
-			//
 			var blobs = GetDirectoryBlobs(path);
 			foreach (var item in blobs)
 			{
@@ -208,9 +206,8 @@ namespace idseefeld.de.UmbracoAzure {
 
 		private bool DirectoryExistsInBlob(string path)
 		{
-			//ToDo:
 			var blobs = GetDirectoryBlobs(path);
-			bool rVal =  blobs.Any();
+			bool rVal = blobs.Any();
 			return rVal;
 		}
 		private IEnumerable<IListBlobItem> GetDirectoryBlobs(string path, bool useFlatBlobListing = true)
@@ -244,7 +241,10 @@ namespace idseefeld.de.UmbracoAzure {
 		private CloudBlockBlob GetBlockBlob(Uri uri)
 		{
 			var blockBlob = cloudBlobClient.GetBlobReferenceFromServer(uri) as CloudBlockBlob;
-			if (blockBlob == null) throw new FileNotFoundException("File not found in BLOB.");
+			if (blockBlob == null)
+			{
+				LogHelper.Warn<AzureBlobFileSystem>("File not found in BLOB: "+ uri.AbsoluteUri);
+			}
 			return blockBlob;
 		}
 		private CloudBlobContainer GetContainer(string containerName)
@@ -280,7 +280,6 @@ namespace idseefeld.de.UmbracoAzure {
 		private string MakePath(string path)
 		{
 			string rVal = path;
-			//ToDo: check for full url
 			if (!path.StartsWith("http"))
 				rVal = RootUrl + path.Replace('\\', '/');
 			return rVal;
@@ -290,13 +289,12 @@ namespace idseefeld.de.UmbracoAzure {
 		{
 			return new Uri(MakePath(path));
 		}
-		//toDo: work wich url not path!
+
 		private void UploadFileToBlob(string fileUrl, Stream fileStream)
 		{
 			string name = fileUrl.Substring(fileUrl.LastIndexOf('/') + 1);
 			var dirPart = fileUrl.Substring(0, fileUrl.LastIndexOf('/'));
 			dirPart = dirPart.Substring(dirPart.LastIndexOf('/') + 1);
-			//var fileName = String.Format("{0}/{1}", dirPart, name);
 			var directory = CreateDirectories(dirPart.Split('/'));
 			var blockBlob = directory.GetBlockBlobReference(name);
 			blockBlob.UploadFromStream(fileStream);
