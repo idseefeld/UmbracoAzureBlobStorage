@@ -74,7 +74,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Umbraco.Core, Version=1.0.5021.24867, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>externals\Umbraco.Core.dll</HintPath>
+      <HintPath>..\..\..\..\..\inetpub\wwwroot\umb6.1.x\www6.2.x\bin\Umbraco.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup />

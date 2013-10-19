@@ -198,9 +198,9 @@ namespace idseefeld.de.UmbracoAzure {
 				var blockBlob = GetBlockBlob(MakeUri(path));
 				blockBlob.Delete();
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				Console.WriteLine(e);
+				LogHelper.Error<AzureBlobFileSystem>("Delete File Error: " + path, ex);
 			}
 		}
 
@@ -243,7 +243,7 @@ namespace idseefeld.de.UmbracoAzure {
 			var blockBlob = cloudBlobClient.GetBlobReferenceFromServer(uri) as CloudBlockBlob;
 			if (blockBlob == null)
 			{
-				LogHelper.Warn<AzureBlobFileSystem>("File not found in BLOB: "+ uri.AbsoluteUri);
+				LogHelper.Warn<AzureBlobFileSystem>("File not found in BLOB: " + uri.AbsoluteUri);
 			}
 			return blockBlob;
 		}

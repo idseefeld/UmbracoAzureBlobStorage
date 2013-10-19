@@ -1,0 +1,22 @@
+Deleting single media item in recycle bin does not use the FileSystemProvider
+
+Delete in tree context menu of a media item in the recycle bin triggers at least the PersistDeletedItem() function in file
+Umbraco-CMS\src\Umbraco.Core\Persistence\Repositories\MediaRepository.cs
+
+A possible solution might be:
+replace 
+
+fs.FileExists(IOHelper.MapPath(property.Value.ToString())) 
+
+by 
+
+fs.FileExists(fs.GetRelativePath(property.Value.ToString()))
+
+in the leading if clause.
+
+Btw.:
+Later on there is this line of code:
+var parentDirectory = System.IO.Path.GetDirectoryName(relativeFilePath);
+The function GetDirectoryName(string relativeFilePathOrUrl) should be a member of IFileSystem I suggest;-)
+
+Yours Dirk

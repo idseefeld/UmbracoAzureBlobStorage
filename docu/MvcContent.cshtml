@@ -1,0 +1,17 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+	<head><title>crop demo</title></head>
+	<body style="background-color:#cc6;">
+		<a href="/umbraco/">CMS</a><br />
+		<h1>MVC Template</h1>
+            
+		@Html.Partial("PropertyEditorValueConverter")
+           
+		<h4>RTE with image</h4>
+		@Umbraco.Field("bodytext")
+	</body>
+</html>

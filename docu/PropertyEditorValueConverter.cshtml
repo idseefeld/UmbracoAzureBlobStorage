@@ -1,0 +1,52 @@
+﻿@using idseefeld.de.imagecropper.PropertyEditorValueConverter;
+@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+	idseefeld.de.imagecropper.Model.CropModel crop = null;
+	idseefeld.de.imagecropper.Model.ImageCropperModel crops = null;
+	CropList cropList = null;
+
+    var prop = Model.Content.GetPropertyValue<int>("myMediaPicker");
+    var prop2 = CurrentPage.MyMediaPicker;
+
+    var mediaItem = Umbraco.Media(Model.Content.GetPropertyValue<int>("myMediaPicker"));//.TypedMedia(prop);
+	string cropValue = String.Empty;
+	if(mediaItem!=null){
+		//Image Cropper Extended property with alias name "crops" assigned to Media Type Image
+		//cropList  = mediaItem.GetPropertyValue<CropList>("imageCrops");
+        cropValue = mediaItem.GetPropertyValue<string>("imageCrops");
+		//from v6.2.0 cropValue will return (Collection), what makes the following if clause necessary
+		//if(cropList==null && !String.IsNullOrEmpty(cropValue)){
+			crops = new idseefeld.de.imagecropper.Model.ImageCropperModel(cropValue);
+		//}
+	}
+	if(crops!=null){
+		//Image Cropper Extended data type contains a crop definition with name "square"
+		crop = crops.Find("square");
+	}
+	if(cropList!=null){
+		crop = cropList.Find("square");
+	}
+}
+<h3>Named Crop of Media Picker Image</h3>
+@if (crop != null)
+{
+	<img src="@crop.NewUrl" width="@crop.Width" height="@crop.Height" alt="@crop.Name" />
+}
+
+<h3>Content Crop with Preview Support</h3>
+@{
+	//on a content document type named "imageSample": 
+	//- define an upload field property
+	//- for this upload field define an image cropper extended data type 
+	//  - add a crop with name "w800"
+	//  - add a property of this type named "topCrops" to the document type "imageSample"
+	idseefeld.de.imagecropper.Model.CropModel w800Crop = null;
+	var contentCrops = Model.Content.GetPropertyValue<CropList>("topCrops");
+	if(contentCrops!=null){
+		w800Crop = contentCrops.Find("w800");
+	}
+}
+@if (w800Crop != null)
+{
+	<img src="@w800Crop.NewUrl" width="@w800Crop.Width" height="@w800Crop.Height" alt="@w800Crop.Name" />
+}

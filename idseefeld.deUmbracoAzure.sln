@@ -3,6 +3,28 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "idseefeld.deUmbracoAzure", "idseefeld.deUmbracoAzure.csproj", "{289E050E-DFB6-492F-B560-C82B5017B382}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "http://umb6.2.x.local", "http://umb6.2.x.local", "{21BEFE3E-448C-4AB4-B2BF-449FB54B31AB}"
+	ProjectSection(WebsiteProperties) = preProject
+		UseIISExpress = "false"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		ProjectReferences = "{289e050e-dfb6-492f-b560-c82b5017b382}|idseefeld.de.UmbracoAzure.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/umb6.2.x.local"
+		Debug.AspNetCompiler.PhysicalPath = "..\..\..\..\..\inetpub\wwwroot\umb6.1.x\www6.2.x\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\umb6.2.x.local\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/umb6.2.x.local"
+		Release.AspNetCompiler.PhysicalPath = "..\..\..\..\..\inetpub\wwwroot\umb6.1.x\www6.2.x\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\umb6.2.x.local\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		SlnRelativePath = "..\..\..\..\..\inetpub\wwwroot\umb6.1.x\www6.2.x\"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +35,10 @@ Global
 		{289E050E-DFB6-492F-B560-C82B5017B382}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{289E050E-DFB6-492F-B560-C82B5017B382}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{289E050E-DFB6-492F-B560-C82B5017B382}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21BEFE3E-448C-4AB4-B2BF-449FB54B31AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21BEFE3E-448C-4AB4-B2BF-449FB54B31AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21BEFE3E-448C-4AB4-B2BF-449FB54B31AB}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{21BEFE3E-448C-4AB4-B2BF-449FB54B31AB}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

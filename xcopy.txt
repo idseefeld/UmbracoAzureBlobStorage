@@ -1,2 +1,6 @@
 ﻿xcopy "$(ProjectDir)bin\idseefeld.de.UmbracoAzure.dll" "C:\inetpub\wwwroot\umb6.1.x\www6.2.x\bin" /Y
 xcopy "$(ProjectDir)bin\idseefeld.de.UmbracoAzure.pdb" "C:\inetpub\wwwroot\umb6.1.x\www6.2.x\bin" /Y
+
+
+xcopy "$(ProjectDir)bin\idseefeld.de.UmbracoAzure.dll" "C:\inetpub\wwwroot\umb6.1.x\www6.1.6azure\bin" /Y
+xcopy "$(ProjectDir)bin\idseefeld.de.UmbracoAzure.pdb" "C:\inetpub\wwwroot\umb6.1.x\www6.1.6azure\bin" /Y
