@@ -254,8 +254,12 @@ namespace idseefeld.de.UmbracoAzure {
 
 		private IEnumerable<string> GetDirectoriesFromBlob(string path)
 		{
-			var blobs = mediaContainer.ListBlobs(path);
-			return blobs.Where(i => i is CloudBlobDirectory).Select(cd => cd.Uri.ToString());
+            var blobs = mediaContainer.ListBlobs(path);
+            return blobs.Where(i => i is CloudBlobDirectory).Select(cd => cd.Uri.ToString());
+
+            //see: https://github.com/idseefeld/UmbracoAzureBlobStorage/issues/1 by stefana99
+            //var blobs = mediaContainer.ListBlobs(path);
+            //return blobs.Where(i => i is CloudBlobDirectory).Select(cd => cd.Uri.Segments[2].Split('/')[0].ToString());
 		}
 
 		private IEnumerable<string> GetFilesFromBlob(string path, string filter)
@@ -297,6 +301,10 @@ namespace idseefeld.de.UmbracoAzure {
 			dirPart = dirPart.Substring(dirPart.LastIndexOf('/') + 1);
 			var directory = CreateDirectories(dirPart.Split('/'));
 			var blockBlob = directory.GetBlockBlobReference(name);
+            if (fileStream.CanSeek)
+            {
+                fileStream.Seek(0, SeekOrigin.Begin);
+            }
 			blockBlob.UploadFromStream(fileStream);
 		}
 	}
