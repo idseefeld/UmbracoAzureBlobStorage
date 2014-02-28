@@ -21,6 +21,7 @@ namespace idseefeld.de.UmbracoAzure {
 		private CloudBlobClient cloudBlobClient;
 		private CloudStorageAccount cloudStorageAccount;
 		private CloudBlobContainer mediaContainer;
+	    private readonly Dictionary<string, CloudBlockBlob> cachedBlobs = new Dictionary<string, CloudBlockBlob>(); 
 
 		public AzureBlobFileSystem(
 			string containerName,
@@ -229,8 +230,8 @@ namespace idseefeld.de.UmbracoAzure {
 		{
 			try
 			{
-				var remPath = MakeUri(path);
-				return cloudBlobClient.GetBlobReferenceFromServer(remPath).Exists();
+			    var blob = GetBlockBlob(MakeUri(path));
+				return blob.Exists();
 			}
 			catch (Exception ex)
 			{
@@ -240,7 +241,12 @@ namespace idseefeld.de.UmbracoAzure {
 
 		private CloudBlockBlob GetBlockBlob(Uri uri)
 		{
-			var blockBlob = cloudBlobClient.GetBlobReferenceFromServer(uri) as CloudBlockBlob;
+			CloudBlockBlob blockBlob;
+		    if (!cachedBlobs.TryGetValue(uri.ToString(), out blockBlob))
+		    {
+		        blockBlob = cloudBlobClient.GetBlobReferenceFromServer(uri) as CloudBlockBlob;
+                cachedBlobs.Add(uri.ToString(), blockBlob);
+		    }
 			if (blockBlob == null)
 			{
 				LogHelper.Warn<AzureBlobFileSystem>("File not found in BLOB: " + uri.AbsoluteUri);
