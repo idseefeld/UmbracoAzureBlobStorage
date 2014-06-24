@@ -213,7 +213,7 @@ namespace idseefeld.de.UmbracoAzure {
 		}
 		private IEnumerable<IListBlobItem> GetDirectoryBlobs(string path, bool useFlatBlobListing = true)
 		{
-			path = path.Replace('\\', '/');
+			path = path.Replace('\\', '/').TrimEnd('/');
 			string dir = path.Substring(path.LastIndexOf('/') + 1);
 			return mediaContainer.ListBlobs(dir, useFlatBlobListing);
 		}
