@@ -35,6 +35,18 @@ namespace idseefeld.de.UmbracoAzure {
 			RootPath = "/";
 		}
 
+	    internal AzureBlobFileSystem(
+            CloudStorageAccount account,
+			string containerName,
+			string rootUrl)
+		{
+			cloudStorageAccount = account;
+			cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+			mediaContainer = CreateContainer(containerName, BlobContainerPublicAccessType.Blob);
+			RootUrl = rootUrl + containerName + "/";
+			RootPath = "/";
+		}
+
 		private string RootPath
 		{
 			get { return _rootPath; }
