@@ -21,9 +21,9 @@ namespace idseefeld.de.UmbracoAzure.Tests
         public void Can_Be_Enumerated()
         {
             var expectedDirectoryNames = new List<string>{ "1000", "1001" };
-            var expectedUrls = expectedDirectoryNames.Select(GetDirectoryUrl);
+            var expectedUrls = expectedDirectoryNames.Select(GetUrl);
 
-            expectedDirectoryNames.ForEach(name => CreateTempDirectory(name));
+            expectedDirectoryNames.ForEach(name => CreateDirectory(name));
 
             var directories = Sut.GetDirectories("").ToList();
 
@@ -35,7 +35,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
         {
             const string directoryName = "1000";
 
-            CreateTempDirectory(directoryName);
+            CreateDirectory(directoryName);
 
             var blob = GetTempBlob(directoryName);
             Assert.That(blob.Exists());
@@ -63,7 +63,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
         {
             const string rootDirectoryName = "1000";
 
-            var directory = CreateTempDirectory(rootDirectoryName);
+            var directory = CreateDirectory(rootDirectoryName);
             var subdirectory = directory.GetSubdirectoryReference("subdirectory");
             var subBlob = CreateTempBlob(subdirectory);
 
@@ -76,17 +76,12 @@ namespace idseefeld.de.UmbracoAzure.Tests
         public void Exists()
         {
             const string name = "1000";
-            CreateTempDirectory(name);
+            CreateDirectory(name);
             
             Assert.That(Sut.DirectoryExists(name));
         }
 
-        private static string GetDirectoryUrl(string dir)
-        {
-            return String.Format("{0}{1}/{2}/", BlobUrl, ContainerName, dir);
-        }
-
-        private CloudBlobDirectory CreateTempDirectory(string name)
+        private CloudBlobDirectory CreateDirectory(string name)
         {
             var directory = GetDirectory(name);
             CreateTempBlob(directory);

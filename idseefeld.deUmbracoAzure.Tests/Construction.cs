@@ -21,6 +21,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
     {
         protected override void OnSetupComplete()
         {
+            RemoveExistingContainer();
             Sut = null;
         }
 

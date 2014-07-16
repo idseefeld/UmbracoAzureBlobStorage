@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Blob;
 using NUnit.Framework;
+using Umbraco.Core.Logging;
 
 namespace idseefeld.de.UmbracoAzure.Tests
 {
@@ -44,21 +45,55 @@ namespace idseefeld.de.UmbracoAzure.Tests
         }
 
         [Test]
-        public void Overwrites_Anyway_When_File_Exists()
+        public void Overwrites_File_When_Adding_Existing_File()
         {
             var stream = CreateTestStream();
             Sut.AddFile("1000/test.dat", stream);
+            
+            stream = CreateTestStream("tst");
             Sut.AddFile("1000/test.dat", stream);
+
+            var blob = GetBlob("1000", "test.dat");
+            Assert.That(blob.DownloadText(), Is.EqualTo("tst"));
         }
 
-        private static MemoryStream CreateTestStream()
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Overwrites_File_With_Any_Override_Parameter(bool overwrite)
         {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            writer.Write("Test");
-            writer.Flush();
-            stream.Seek(0, SeekOrigin.Begin);
-            return stream;
+            var stream = CreateTestStream();
+            Sut.AddFile("1000/test.dat", stream);
+
+            stream = CreateTestStream("tst");
+            Sut.AddFile("1000/test.dat", stream, overwrite);
+
+            var blob = GetBlob("1000", "test.dat");
+            Assert.That(blob.DownloadText(), Is.EqualTo("tst"));
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Adds_New_File_With_Any_Override_Parameter(bool overwrite)
+        {
+            var stream = CreateTestStream("tst");
+            Sut.AddFile("1000/test.dat", stream, overwrite);
+
+            var blob = GetBlob("1000", "test.dat");
+            Assert.That(blob.DownloadText(), Is.EqualTo("tst"));
+        }
+
+        [Test]
+        public void Creates_New_Directory_At_Root_For_Last_Directory_Before_FileName()
+        {
+            const string path = "1000/thumbs/test.dat";
+            const string sub = "thumbs";
+
+            var stream = CreateTestStream();
+            Sut.AddFile(path, stream);
+
+            Assert.That(Sut.DirectoryExists(sub));
         }
 
         private CloudBlobDirectory GetDirectory(string directoryName)

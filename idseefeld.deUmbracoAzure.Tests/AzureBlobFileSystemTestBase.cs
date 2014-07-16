@@ -1,8 +1,11 @@
 using System;
+using System.IO;
+using idseefeld.de.UmbracoAzure.Infrastructure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using NUnit.Framework;
+using Rhino.Mocks;
 
 namespace idseefeld.de.UmbracoAzure.Tests
 {
@@ -11,25 +14,15 @@ namespace idseefeld.de.UmbracoAzure.Tests
         protected CloudStorageAccount Account;
         protected CloudBlobClient Client;
         protected AzureBlobFileSystem Sut;
-        private const string EmulatorPath = @"C:\Program Files (x86)\Microsoft SDKs\Windows Azure\Storage Emulator\";
-        private const string EmulatorExe = "WAStorageEmulator.exe";
         protected const string ContainerName = "media";
         protected const string BlobUrl = "http://127.0.0.1:10000/" + AccountName + "/";
         private const string AccountName = "devstoreaccount1";
         private const string AccountKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+        protected const string TestContent = "Test";
 
         [SetUp]
         public void Setup()
         {
-            //var clearProcessInfo = new ProcessStartInfo(EmulatorPath + EmulatorExe, "clear")
-            //{
-            //    CreateNoWindow = true,
-            //    UseShellExecute = false,
-            //    WorkingDirectory = EmulatorPath
-            //};
-            //var process = Process.Start(clearProcessInfo);
-            //process.WaitForExit();
-
             CreateAccount();
             CreateClient();
             RemoveExistingContainer();
@@ -59,7 +52,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
             Client = Account.CreateCloudBlobClient();
         }
 
-        private void RemoveExistingContainer()
+        protected void RemoveExistingContainer()
         {
             var container = Client.GetContainerReference(ContainerName);
             if (container.Exists())
@@ -76,10 +69,26 @@ namespace idseefeld.de.UmbracoAzure.Tests
         protected void CreateSut()
         {
             Sut = new AzureBlobFileSystem(
+                MockRepository.GenerateStub<ILogger>(),
                 Account,
                 ContainerName,
                 BlobUrl
                 );
+        }
+
+        protected static MemoryStream CreateTestStream(string content = TestContent)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(content);
+            writer.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+
+        protected static string GetUrl(string path)
+        {
+            return String.Format("{0}{1}/{2}/", BlobUrl, ContainerName, path);
         }
     }
 }
