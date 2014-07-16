@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "idseefeld.deUmbracoAzure", "idseefeld.deUmbracoAzure.csproj", "{289E050E-DFB6-492F-B560-C82B5017B382}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "idseefeld.deUmbracoAzure.Tests", "idseefeld.deUmbracoAzure.Tests\idseefeld.deUmbracoAzure.Tests.csproj", "{AC01AAB7-D36B-4BD7-9833-BD07458FA0EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +17,10 @@ Global
 		{289E050E-DFB6-492F-B560-C82B5017B382}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{289E050E-DFB6-492F-B560-C82B5017B382}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{289E050E-DFB6-492F-B560-C82B5017B382}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC01AAB7-D36B-4BD7-9833-BD07458FA0EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC01AAB7-D36B-4BD7-9833-BD07458FA0EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC01AAB7-D36B-4BD7-9833-BD07458FA0EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC01AAB7-D36B-4BD7-9833-BD07458FA0EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

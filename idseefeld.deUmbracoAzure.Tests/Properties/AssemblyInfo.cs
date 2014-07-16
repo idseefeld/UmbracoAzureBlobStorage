@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("idseefeld.de.UmbracoAzure")]
+[assembly: AssemblyTitle("idseefeld.deUmbracoAzure.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Dirk Seefeld")]
-[assembly: AssemblyProduct("idseefeld.de.UmbracoAzure.Properties")]
-[assembly: AssemblyCopyright("Copyright © Dirk Seefeld 2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("idseefeld.deUmbracoAzure.Tests")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("da0c3808-0542-4eb0-acc9-95475bef1e90")]
+[assembly: Guid("354250be-be1f-4936-9bba-a99a7c39af0a")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -29,7 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-
-[assembly: InternalsVisibleTo("idseefeld.de.UmbracoAzure.Tests")]

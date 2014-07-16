@@ -1,18 +1,16 @@
 ﻿/*
 This code was inspired by Johannes Mueller
 */
+
+using idseefeld.de.UmbracoAzure.Infrastructure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Auth;
 using System;
-using System.Web;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.IO;
-using Umbraco.Core.Logging;
 
 namespace idseefeld.de.UmbracoAzure {
 	public class AzureBlobFileSystem : IFileSystem {
@@ -21,7 +19,8 @@ namespace idseefeld.de.UmbracoAzure {
 		private CloudBlobClient cloudBlobClient;
 		private CloudStorageAccount cloudStorageAccount;
 		private CloudBlobContainer mediaContainer;
-	    private readonly Dictionary<string, CloudBlockBlob> cachedBlobs = new Dictionary<string, CloudBlockBlob>(); 
+	    private readonly Dictionary<string, CloudBlockBlob> cachedBlobs = new Dictionary<string, CloudBlockBlob>();
+	    private readonly ILogger logger;
 
 		public AzureBlobFileSystem(
 			string containerName,
@@ -33,7 +32,24 @@ namespace idseefeld.de.UmbracoAzure {
 			mediaContainer = CreateContainer(containerName, BlobContainerPublicAccessType.Blob);
 			RootUrl = rootUrl + containerName + "/";
 			RootPath = "/";
+            
+            logger = new LogAdapter();
 		}
+
+	    internal AzureBlobFileSystem(
+            ILogger logger,
+            CloudStorageAccount account,
+			string containerName,
+			string rootUrl)
+	    {
+            cloudStorageAccount = account;
+			cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+			mediaContainer = CreateContainer(containerName, BlobContainerPublicAccessType.Blob);
+			RootUrl = rootUrl + containerName + "/";
+			RootPath = "/";
+        
+            this.logger = logger;
+        }
 
 		private string RootPath
 		{
@@ -52,7 +68,7 @@ namespace idseefeld.de.UmbracoAzure {
 			var fileExists = FileExists(path);
 			if (fileExists && !overrideIfExists)
 			{
-				LogHelper.Warn<AzureBlobFileSystem>(string.Format("A file at path '{0}' already exists", path));
+				logger.Warn<AzureBlobFileSystem>(string.Format("A file at path '{0}' already exists", path));
 			}
 			AddFile(path, stream);
 		}
@@ -201,7 +217,7 @@ namespace idseefeld.de.UmbracoAzure {
 			}
 			catch (Exception ex)
 			{
-				LogHelper.Error<AzureBlobFileSystem>("Delete File Error: " + path, ex);
+				logger.Error<AzureBlobFileSystem>("Delete File Error: " + path, ex);
 			}
 		}
 
@@ -249,7 +265,7 @@ namespace idseefeld.de.UmbracoAzure {
 		    }
 			if (blockBlob == null)
 			{
-				LogHelper.Warn<AzureBlobFileSystem>("File not found in BLOB: " + uri.AbsoluteUri);
+				logger.Warn<AzureBlobFileSystem>("File not found in BLOB: " + uri.AbsoluteUri);
 			}
 			return blockBlob;
 		}
