@@ -274,14 +274,13 @@ namespace idseefeld.de.UmbracoAzure {
 			return cloudBlobClient.GetContainerReference(containerName);
 		}
 
-		private IEnumerable<string> GetDirectoriesFromBlob(string path)
-		{
+        private IEnumerable<string> GetDirectoriesFromBlob(string path)
+        {
             var blobs = mediaContainer.ListBlobs(path);
-            //see: https://github.com/idseefeld/UmbracoAzureBlobStorage/issues/1 by stefana99
-            return blobs.Where(i => i is CloudBlobDirectory).Select(cd => cd.Uri.Segments[2].Split('/')[0].ToString());
-
-
-		}
+            //always get last segment for media sub folder simulation
+            var rVal = blobs.Where(i => i is CloudBlobDirectory).Select(cd => cd.Uri.Segments[cd.Uri.Segments.Length - 1].Split('/')[0]);
+            return rVal;
+        }
 
 		private IEnumerable<string> GetFilesFromBlob(string path, string filter)
 		{
@@ -317,7 +316,8 @@ namespace idseefeld.de.UmbracoAzure {
 
 		private void UploadFileToBlob(string fileUrl, Stream fileStream)
 		{
-			string name = fileUrl.Substring(fileUrl.LastIndexOf('/') + 1);
+            string name = fileUrl.Substring(fileUrl.LastIndexOf('/') + 1);
+            string ext = name.Substring(name.LastIndexOf('.') + 1).ToLower();
 			var dirPart = fileUrl.Substring(0, fileUrl.LastIndexOf('/'));
 			dirPart = dirPart.Substring(dirPart.LastIndexOf('/') + 1);
 			var directory = CreateDirectories(dirPart.Split('/'));
@@ -326,7 +326,28 @@ namespace idseefeld.de.UmbracoAzure {
             {
                 fileStream.Seek(0, SeekOrigin.Begin);
             }
-			blockBlob.UploadFromStream(fileStream);
+            blockBlob.UploadFromStream(fileStream);
+            string contentType = null;
+            switch (ext)
+            {
+                case "jpg":
+                case "jpeg":
+                    contentType = "image/jpeg";
+                    break;
+                case "png":
+                    contentType = "image/png";
+                    break;
+                case "gif":
+                    contentType = "image/gif";
+                    break;
+                default:
+                    break;
+            }
+            if (!String.IsNullOrEmpty(contentType))
+            {
+                blockBlob.Properties.ContentType = contentType;
+                blockBlob.SetProperties();
+            }
 		}
 	}
 }
