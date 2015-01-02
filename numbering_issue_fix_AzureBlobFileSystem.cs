@@ -1,4 +1,5 @@
 ﻿/*
+include this file into project instead of AzureBlobFileSystem.cs
 This code was inspired by Johannes Mueller
 */
 
