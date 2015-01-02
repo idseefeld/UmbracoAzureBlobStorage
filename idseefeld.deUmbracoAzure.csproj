@@ -84,9 +84,9 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Umbraco.Core, Version=1.0.5021.24867, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Umbraco.Core, Version=1.0.5462.37503, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>externals\7.2.1\Umbraco.Core.dll</HintPath>
+      <HintPath>externals\6.1.6\Umbraco.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup />

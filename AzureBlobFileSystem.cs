@@ -19,6 +19,7 @@ namespace idseefeld.de.UmbracoAzure {
 		private CloudBlobClient cloudBlobClient;
 		private CloudStorageAccount cloudStorageAccount;
 		private CloudBlobContainer mediaContainer;
+        private Dictionary<string, string> mimeTypes;
 	    private readonly Dictionary<string, CloudBlockBlob> cachedBlobs = new Dictionary<string, CloudBlockBlob>();
 	    private readonly ILogger logger;
 
@@ -27,14 +28,39 @@ namespace idseefeld.de.UmbracoAzure {
 			string rootUrl,
 			string connectionString)
 		{
-			cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-			cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
-			mediaContainer = CreateContainer(containerName, BlobContainerPublicAccessType.Blob);
-			RootUrl = rootUrl + containerName + "/";
-			RootPath = "/";
-            
+            Init(containerName, rootUrl, connectionString, null);
             logger = new LogAdapter();
 		}
+        public AzureBlobFileSystem(
+            string containerName,
+            string rootUrl,
+            string connectionString,
+            string mimetypes)
+        {
+            Init(containerName, rootUrl, connectionString, mimetypes);
+            logger = new LogAdapter();
+        }
+        private void Init(string containerName, string rootUrl, string connectionString, string mimetypes)
+        {
+            cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+            cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+            mediaContainer = CreateContainer(containerName, BlobContainerPublicAccessType.Blob);
+            RootUrl = rootUrl + containerName + "/";
+            RootPath = "/";
+            if (mimetypes != null)
+            {
+                var pairs = mimetypes.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                this.mimeTypes = new Dictionary<string, string>();
+                foreach (var pair in pairs)
+                {
+                    string[] type = pair.Split("|".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    if (type.Length == 2)
+                    {
+                        this.mimeTypes.Add(type[0], type[1]);
+                    }
+                }
+            }
+        }
 
 	    internal AzureBlobFileSystem(
             ILogger logger,
@@ -130,7 +156,8 @@ namespace idseefeld.de.UmbracoAzure {
 
 		public IEnumerable<string> GetFiles(string path)
 		{
-			return GetFiles(path, "*.*");
+            var rVal = GetFiles(path, "*.*");
+            return rVal;
 		}
 
 		public string GetFullPath(string path)
@@ -191,7 +218,7 @@ namespace idseefeld.de.UmbracoAzure {
 			var current = mediaContainer.GetDirectoryReference(paths[0]);
 			for (var i = 1; i < paths.Count(); i++)
 			{
-				current = current.GetSubdirectoryReference(paths[i]);
+				current = current.GetDirectoryReference(paths[i]);
 			}
 			return current;
 		}
@@ -317,7 +344,6 @@ namespace idseefeld.de.UmbracoAzure {
 		private void UploadFileToBlob(string fileUrl, Stream fileStream)
 		{
             string name = fileUrl.Substring(fileUrl.LastIndexOf('/') + 1);
-            string ext = name.Substring(name.LastIndexOf('.') + 1).ToLower();
 			var dirPart = fileUrl.Substring(0, fileUrl.LastIndexOf('/'));
 			dirPart = dirPart.Substring(dirPart.LastIndexOf('/') + 1);
 			var directory = CreateDirectories(dirPart.Split('/'));
@@ -327,27 +353,48 @@ namespace idseefeld.de.UmbracoAzure {
                 fileStream.Seek(0, SeekOrigin.Begin);
             }
             blockBlob.UploadFromStream(fileStream);
-            string contentType = null;
-            switch (ext)
-            {
-                case "jpg":
-                case "jpeg":
-                    contentType = "image/jpeg";
-                    break;
-                case "png":
-                    contentType = "image/png";
-                    break;
-                case "gif":
-                    contentType = "image/gif";
-                    break;
-                default:
-                    break;
-            }
+            string contentType = GetMimeType(name);
             if (!String.IsNullOrEmpty(contentType))
             {
                 blockBlob.Properties.ContentType = contentType;
                 blockBlob.SetProperties();
             }
 		}
+
+        private string GetMimeType(string name)
+        {
+            string rVal = null;
+            string ext = name.Substring(name.LastIndexOf('.') + 1).ToLower();
+            switch (ext)
+            {
+                case "jpg":
+                case "jpeg":
+                    rVal = "image/jpeg";
+                    break;
+                case "png":
+                    rVal = "image/png";
+                    break;
+                case "gif":
+                    rVal = "image/gif";
+                    break;
+                case "pdf":
+                    rVal = "application/pdf";
+                    break;
+                case "air":
+                    rVal = "application/vnd.adobe.air-application-installer-package+zip";
+                    break;
+                default:
+                    if (this.mimeTypes != null)
+                    {
+                        var type = this.mimeTypes.Where(t => t.Key.Equals(ext)).FirstOrDefault();
+                        if (!String.IsNullOrEmpty(type.Value))
+                        {
+                            rVal = type.Value;
+                        }
+                    }
+                    break;
+            }
+            return rVal;
+        }
 	}
 }

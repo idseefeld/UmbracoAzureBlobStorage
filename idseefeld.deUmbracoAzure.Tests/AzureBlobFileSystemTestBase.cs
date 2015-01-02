@@ -43,6 +43,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
 
                 // Not used, just need to specify something
                 new Uri(BlobUrl),
+                new Uri(BlobUrl),
                 new Uri(BlobUrl)
                 );
         }
