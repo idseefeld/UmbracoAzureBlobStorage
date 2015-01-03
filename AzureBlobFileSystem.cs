@@ -11,11 +11,17 @@ using System.IO;
 using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.IO;
+using System.Web.Caching;
+using System.Web;
 
 namespace idseefeld.de.UmbracoAzure
 {
     public class AzureBlobFileSystem : IFileSystem
     {
+        private class CacheIntHelper
+        {
+            public int Number { get; set; }
+        }
         private string _rootPath;
         private string _rootUrl;
         private CloudBlobClient cloudBlobClient;
@@ -25,6 +31,78 @@ namespace idseefeld.de.UmbracoAzure
         private readonly Dictionary<string, CloudBlockBlob> cachedBlobs = new Dictionary<string, CloudBlockBlob>();
         private readonly ILogger logger;
 
+        #region FixDirectoryIssue
+        //fix for directory numbering issue
+        private readonly int _lastMediaFolderNumberBeforeFix = 0;
+
+        private const string fixDirectoryIssueFile = "fixDirectoryIssueFile.txt";
+        private int GetLastMediaFolderNumberBeforeFix()
+        {
+            string cacheKey = "getLastMediaFolderNumberBeforeFix";
+            CacheIntHelper cacheItem = GetItemFromCache<CacheIntHelper>(cacheKey);
+            if (cacheItem != null)
+            {
+                return cacheItem.Number;
+            }
+
+            int lastMediaFolderNumber = 0;
+            if (FileExists(fixDirectoryIssueFile))
+            {
+                lastMediaFolderNumber = GetFixDirectoryIssueFileText();
+            }
+            else
+            {
+
+                var allDirectories = mediaContainer.ListBlobs().Where(i => i is CloudBlobDirectory).Select(cd => cd.Uri.Segments[cd.Uri.Segments.Length - 1].Split('/')[0]);
+                foreach (var dir in allDirectories)
+                {
+                    int dirNumber = 0;
+                    if (int.TryParse(dir, out dirNumber))
+                    {
+                        if (dirNumber > lastMediaFolderNumber)
+                        {
+                            lastMediaFolderNumber = dirNumber;
+                        }
+                    }
+                }
+                var fixDirectoryIssueFileBlob = mediaContainer.GetBlockBlobReference(fixDirectoryIssueFile);
+                fixDirectoryIssueFileBlob.UploadText(lastMediaFolderNumber.ToString());
+                fixDirectoryIssueFileBlob.Properties.ContentType = "text/plain";
+                fixDirectoryIssueFileBlob.SetProperties();
+            }
+
+            cacheItem = new CacheIntHelper() { Number = lastMediaFolderNumber };
+            CacheItem<CacheIntHelper>(cacheKey, cacheItem);
+            return lastMediaFolderNumber;
+        }
+        private int GetFixDirectoryIssueFileText()
+        {
+            int rVal = 0;
+            var redirectListBlob = mediaContainer.GetBlockBlobReference(fixDirectoryIssueFile);
+            try
+            {
+                rVal = int.Parse(redirectListBlob.DownloadText());
+            }
+            catch (Exception ex)
+            {
+                logger.Error<AzureBlobFileSystem>("GetFixDirectoryIssueFileText reading text", ex);
+            }
+            return rVal;
+        }
+
+        private void CacheItem<T>(string key, T value)
+        {
+            var uCache = HttpContext.Current.Cache;
+            uCache.Add(key, value, null, Cache.NoAbsoluteExpiration, new TimeSpan(1, 0, 0), CacheItemPriority.Default, null);
+        }
+        private static T GetItemFromCache<T>(string key)
+        {
+            var uCache = HttpContext.Current.Cache;
+            T rVal = (T)uCache.Get(key);
+            return rVal;
+        }
+        #endregion
+
         public AzureBlobFileSystem(
             string containerName,
             string rootUrl,
@@ -32,6 +110,7 @@ namespace idseefeld.de.UmbracoAzure
         {
             Init(containerName, rootUrl, connectionString, null);
             logger = new LogAdapter();
+            _lastMediaFolderNumberBeforeFix = GetLastMediaFolderNumberBeforeFix();
         }
         public AzureBlobFileSystem(
             string containerName,
@@ -41,6 +120,7 @@ namespace idseefeld.de.UmbracoAzure
         {
             Init(containerName, rootUrl, connectionString, mimetypes);
             logger = new LogAdapter();
+            _lastMediaFolderNumberBeforeFix = GetLastMediaFolderNumberBeforeFix();
         }
         private void Init(string containerName, string rootUrl, string connectionString, string mimetypes)
         {
@@ -113,6 +193,13 @@ namespace idseefeld.de.UmbracoAzure
         public void DeleteDirectory(string path, bool recursive)
         {
             if (!DirectoryExists(path))
+                return;
+
+            var segments = path.Replace('\\', '/').Split('/');
+            string dir = segments[segments.Length - 1];
+            int dirNumber = 0;
+            if (int.TryParse(dir, out dirNumber) 
+                && dirNumber <= _lastMediaFolderNumberBeforeFix)
                 return;
 
             DeleteDirectoryInBlob(path);
