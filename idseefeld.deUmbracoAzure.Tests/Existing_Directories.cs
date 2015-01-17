@@ -27,7 +27,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
 
             var directories = Sut.GetDirectories("").ToList();
 
-            Assert.That(expectedUrls.SequenceEqual(directories), String.Join(",", directories));
+            Assert.That(expectedDirectoryNames.SequenceEqual(directories), String.Join(",", directories));
         }
 
         [Test]
