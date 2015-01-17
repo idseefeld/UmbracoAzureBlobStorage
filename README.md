@@ -16,6 +16,9 @@ My local sql server instance is called "SQLEXPRESS2008".
 In your command line tool enter:
 
 cd C:\Program Files (x86)\Microsoft SDKs\Azure\Storage Emulator
+
 WAStorageEmulator stop
+
 WAStorageEmulator init -sqlinstance SQLEXPRESS2008
+
 WAStorageEmulator start
