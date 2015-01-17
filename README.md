@@ -22,3 +22,10 @@ WAStorageEmulator stop
 WAStorageEmulator init -sqlinstance SQLEXPRESS2008
 
 WAStorageEmulator start
+
+Book recommendation
+-------------------
+The book "Programming Windows Azure [Kindle Edition]" form "Sriram Krishnan" gives you a good introduction into Azure Storage.
+You find as Kindle book here:
+
+http://www.amazon.de/Programming-Windows-Azure-Sriram-Krishnan-ebook/dp/B0043M58U8/ref=cm_sw_em_r_dpcod_pXMUub0J6GCXP_tt
