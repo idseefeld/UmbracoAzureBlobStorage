@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="FileSystemProviders.config">
+    <None Include="FileSystemProviders-Sample.config">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config">
