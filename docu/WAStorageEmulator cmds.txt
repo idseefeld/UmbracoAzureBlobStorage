@@ -1,0 +1,3 @@
+WAStorageEmulator stop
+WAStorageEmulator init -sqlinstance SQLEXPRESS2008
+WAStorageEmulator start
