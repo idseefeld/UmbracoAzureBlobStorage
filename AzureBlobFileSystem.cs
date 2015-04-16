@@ -355,6 +355,10 @@ namespace idseefeld.de.UmbracoAzure
             var blockBlob = GetBlockBlob(MakeUri(path));
             var fileStream = new MemoryStream();
             blockBlob.DownloadToStream(fileStream);
+            if (fileStream.CanSeek)
+            {
+                fileStream.Seek(0, SeekOrigin.Begin);
+            }
             return fileStream;
         }
 
