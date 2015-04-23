@@ -28,6 +28,7 @@ namespace idseefeld.de.UmbracoAzure
         private CloudStorageAccount cloudStorageAccount;
         private CloudBlobContainer mediaContainer;
         private Dictionary<string, string> mimeTypes;
+        private Dictionary<string, string> cacheControlSettings;
         private readonly Dictionary<string, CloudBlockBlob> cachedBlobs = new Dictionary<string, CloudBlockBlob>();
         private readonly ILogger logger;
 
@@ -108,7 +109,7 @@ namespace idseefeld.de.UmbracoAzure
             string rootUrl,
             string connectionString)
         {
-            Init(containerName, rootUrl, connectionString, null);
+            Init(containerName, rootUrl, connectionString, null, null);
             logger = new LogAdapter();
             _lastMediaFolderNumberBeforeFix = GetLastMediaFolderNumberBeforeFix();
         }
@@ -118,11 +119,23 @@ namespace idseefeld.de.UmbracoAzure
             string connectionString,
             string mimetypes)
         {
-            Init(containerName, rootUrl, connectionString, mimetypes);
+            Init(containerName, rootUrl, connectionString, mimetypes, null);
             logger = new LogAdapter();
             _lastMediaFolderNumberBeforeFix = GetLastMediaFolderNumberBeforeFix();
         }
-        private void Init(string containerName, string rootUrl, string connectionString, string mimetypes)
+
+        public AzureBlobFileSystem(
+            string containerName,
+            string rootUrl,
+            string connectionString,
+            string mimetypes,
+            string cacheControl)
+        {
+            Init(containerName, rootUrl, connectionString, mimetypes, cacheControl);
+            logger = new LogAdapter();
+            _lastMediaFolderNumberBeforeFix = GetLastMediaFolderNumberBeforeFix();
+        }
+        private void Init(string containerName, string rootUrl, string connectionString, string mimetypes, string cacheControl)
         {
             cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
             cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
@@ -142,7 +155,80 @@ namespace idseefeld.de.UmbracoAzure
                     }
                 }
             }
+            if (cacheControl != null)
+            {
+                var pairs = cacheControl.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                this.cacheControlSettings = new Dictionary<string, string>();
+                foreach (var pair in pairs)
+                {
+                    string[] type = pair.Split("|".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    if (type.Length == 2)
+                    {
+                        string value = CheckCacheControlSetting(type[1]);
+                        if (!String.IsNullOrEmpty(value))
+                        {
+                            this.cacheControlSettings.Add(type[0], value);
+                        }
+                    }
+                }
+            }
         }
+        /// <summary>
+        /// validate a cache-control setting
+        /// see: https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching
+        /// </summary>
+        /// <param name="setting">cache-control setting</param>
+        /// <returns>valid cache-control setting or null</returns>
+        private string CheckCacheControlSetting(string setting)
+        {
+            var validPrefixes = "public|privat|no-store|no-cache".Split('|');
+            string rVal = null;
+            try
+            {
+                bool valid = false;
+                var parts = setting.ToLower().Split(',');
+                if (parts.Length > 1)
+                {
+                    if (validPrefixes.Contains(parts[0])
+                        && parts[1].Contains("=")
+                        && parts[1].Trim().StartsWith("max-age"))
+                    {
+                        int seconds = -1;
+                        if (int.TryParse(parts[1].Split('=')[1], out seconds))
+                        {
+                            valid = true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (validPrefixes.Contains(parts[0]))
+                    {
+                        valid = true;
+                    }
+                    else if (parts[0].Contains("=")
+                        && parts[0].StartsWith("max-age"))
+                    {
+                        int seconds = -1;
+                        if (int.TryParse(parts[0].Split('=')[1], out seconds))
+                        {
+                            valid = true;
+                        }
+                    }
+                }
+                if (valid)
+                {
+                    rVal = setting.ToLower();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error<AzureBlobFileSystem>(ex.Message, ex);
+            }
+            return rVal;
+        }
+
+
 
         internal AzureBlobFileSystem(
             ILogger logger,
@@ -198,7 +284,7 @@ namespace idseefeld.de.UmbracoAzure
             var segments = path.Replace('\\', '/').Split('/');
             string dir = segments[segments.Length - 1];
             int dirNumber = 0;
-            if (int.TryParse(dir, out dirNumber) 
+            if (int.TryParse(dir, out dirNumber)
                 && dirNumber <= _lastMediaFolderNumberBeforeFix)
                 return;
 
@@ -447,50 +533,40 @@ namespace idseefeld.de.UmbracoAzure
             }
             blockBlob.UploadFromStream(fileStream);
             string contentType = GetMimeType(name);
-            if (!String.IsNullOrEmpty(contentType))
+            string cacheControl = GetCacheControlByFileType(name);
+            if (!String.IsNullOrEmpty(contentType)
+                || !String.IsNullOrEmpty(cacheControl))
             {
-                blockBlob.Properties.ContentType = contentType;
+                if (!String.IsNullOrEmpty(contentType))
+                    blockBlob.Properties.ContentType = contentType;
+                if (!String.IsNullOrEmpty(cacheControl))
+                    blockBlob.Properties.CacheControl = cacheControl;
                 blockBlob.SetProperties();
             }
         }
-
-        private string GetMimeType(string name)
+        private string GetCacheControlByFileType(string name)
         {
             string rVal = null;
+            if (this.cacheControlSettings.Count == 0)
+                return rVal;
+
+            var wildcard = "*";
             string ext = name.Substring(name.LastIndexOf('.') + 1).ToLower();
-            if (this.mimeTypes != null)
+            if (this.cacheControlSettings.ContainsKey(ext))
             {
-                var type = this.mimeTypes.Where(t => t.Key.Equals(ext)).FirstOrDefault();
-                if (!String.IsNullOrEmpty(type.Value))
-                {
-                    rVal = type.Value;
-                }
+                rVal = this.cacheControlSettings[ext];
             }
-            if (String.IsNullOrEmpty(rVal))
+            else if (this.cacheControlSettings.ContainsKey(wildcard))
             {
-                switch (ext)
-                {
-                    case "jpg":
-                    case "jpeg":
-                        rVal = "image/jpeg";
-                        break;
-                    case "png":
-                        rVal = "image/png";
-                        break;
-                    case "gif":
-                        rVal = "image/gif";
-                        break;
-                    case "pdf":
-                        rVal = "application/pdf";
-                        break;
-                    case "air":
-                        rVal = "application/vnd.adobe.air-application-installer-package+zip";
-                        break;
-                    default:
-                        break;
-                }
+                rVal = this.cacheControlSettings[wildcard];
             }
             return rVal;
+        }
+        private string GetMimeType(string name)
+        {
+            string ext = name.Substring(name.LastIndexOf('.')).ToLower();
+            string mimeType = MimeMapping.GetMimeMapping(ext);
+            return mimeType;
         }
     }
 }
