@@ -181,7 +181,7 @@ namespace idseefeld.de.UmbracoAzure
         /// <returns>valid cache-control setting or null</returns>
         private string CheckCacheControlSetting(string setting)
         {
-            var validPrefixes = "public|privat|no-store|no-cache".Split('|');
+            var validPrefixes = "public|private|no-store|no-cache".Split('|');
             string rVal = null;
             try
             {
