@@ -547,7 +547,8 @@ namespace idseefeld.de.UmbracoAzure
         private string GetCacheControlByFileType(string name)
         {
             string rVal = null;
-            if (this.cacheControlSettings.Count == 0)
+            if (this.cacheControlSettings==null
+                || this.cacheControlSettings.Count == 0)
                 return rVal;
 
             var wildcard = "*";
