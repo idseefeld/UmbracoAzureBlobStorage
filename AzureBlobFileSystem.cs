@@ -13,11 +13,14 @@ using Umbraco.Core;
 using Umbraco.Core.IO;
 using System.Web.Caching;
 using System.Web;
+using System.Configuration;
 
 namespace idseefeld.de.UmbracoAzure
 {
     public class AzureBlobFileSystem : IFileSystem
     {
+        private const string UseWAStorageEmulatorKey = "AzureBlobFileSystem.UseWAStorageEmulator";
+
         private class CacheIntHelper
         {
             public int Number { get; set; }
@@ -137,9 +140,26 @@ namespace idseefeld.de.UmbracoAzure
         }
         private void Init(string containerName, string rootUrl, string connectionString, string mimetypes, string cacheControl)
         {
-            cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+            bool useWAStorageEmulator =
+                ConfigurationManager.AppSettings[UseWAStorageEmulatorKey] != null
+                && ConfigurationManager.AppSettings[UseWAStorageEmulatorKey]
+                    .Equals("true", StringComparison.InvariantCultureIgnoreCase);
+            if (useWAStorageEmulator)
+            {
+                cloudStorageAccount = CloudStorageAccount.DevelopmentStorageAccount;
+                rootUrl = cloudStorageAccount.BlobStorageUri.PrimaryUri.AbsoluteUri;
+            }
+            else
+            {
+                cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+            }
             cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
             mediaContainer = CreateContainer(containerName, BlobContainerPublicAccessType.Blob);
+            if (!rootUrl.Trim().EndsWith("/"))
+            {
+                rootUrl = rootUrl.Trim() + "/";
+            }
             RootUrl = rootUrl + containerName + "/";
             RootPath = "/";
             if (mimetypes != null)
@@ -547,7 +567,7 @@ namespace idseefeld.de.UmbracoAzure
         private string GetCacheControlByFileType(string name)
         {
             string rVal = null;
-            if (this.cacheControlSettings==null
+            if (this.cacheControlSettings == null
                 || this.cacheControlSettings.Count == 0)
                 return rVal;
 
