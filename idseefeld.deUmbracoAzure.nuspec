@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>$id$</id>
+        <version>$version$</version>
+        <authors>$authors$</authors>
+        <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+        <projectUrl>http://our.umbraco.org/projects/backoffice-extensions/azure-blob-storage-provider</projectUrl>
+        <iconUrl>http://www.idseefeld.de/favicon.ico</iconUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <description>Store media files in Azure Storage
+
+You have to configure the file system provider for your Azure Storage Account in umbraco /config in file FileSystemProviders.config.
+
+This package installs a sample config file: ~/Config/FileSystemProviders-sample.config</description>
+        <language>en-US</language>
+        <tags>umbraco filesystemprovider azure</tags>
+        
+    </metadata>
+    <files>
+        <file src="FileSystemProviders-Sample.config" target="content\config\FileSystemProviders-Sample.config" />
+        <!--<file src="lib\net45\idseefeld.de.UmbracoAzure.dll" target="lib\net45\idseefeld.de.UmbracoAzure.dll" />-->
+    </files>
+</package>
