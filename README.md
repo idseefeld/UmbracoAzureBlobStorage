@@ -29,3 +29,7 @@ The book "Programming Windows Azure [Kindle Edition]" form "Sriram Krishnan" giv
 You find as Kindle book here:
 
 http://www.amazon.de/Programming-Windows-Azure-Sriram-Krishnan-ebook/dp/B0043M58U8/ref=cm_sw_em_r_dpcod_pXMUub0J6GCXP_tt
+
+Regret
+-------
+Sorry, but I deleted the repository inadvertently. I put the main data back on github. However, the forks are no longer connect to main repo (upstream) and the issues are gone. 

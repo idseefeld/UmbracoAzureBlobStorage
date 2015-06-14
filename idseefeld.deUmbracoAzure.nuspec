@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
 <package>
     <metadata>
-        <id>$id$</id>
+        <id>UmbracoAzureBlobStorageProvider</id>
         <version>$version$</version>
-        <authors>$authors$</authors>
+        <authors>$author$</authors>
         <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
         <projectUrl>http://our.umbraco.org/projects/backoffice-extensions/azure-blob-storage-provider</projectUrl>
         <iconUrl>http://www.idseefeld.de/favicon.ico</iconUrl>
@@ -19,6 +19,5 @@ This package installs a sample config file: ~/Config/FileSystemProviders-sample.
     </metadata>
     <files>
         <file src="FileSystemProviders-Sample.config" target="content\config\FileSystemProviders-Sample.config" />
-        <!--<file src="lib\net45\idseefeld.de.UmbracoAzure.dll" target="lib\net45\idseefeld.de.UmbracoAzure.dll" />-->
     </files>
 </package>

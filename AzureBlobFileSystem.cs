@@ -475,7 +475,7 @@ namespace idseefeld.de.UmbracoAzure
                 var blob = GetBlockBlob(MakeUri(path));
                 return blob.Exists();
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
