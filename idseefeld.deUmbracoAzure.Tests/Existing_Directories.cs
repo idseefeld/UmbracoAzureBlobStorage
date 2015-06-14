@@ -64,7 +64,7 @@ namespace idseefeld.de.UmbracoAzure.Tests
             const string rootDirectoryName = "1000";
 
             var directory = CreateDirectory(rootDirectoryName);
-            var subdirectory = directory.GetSubdirectoryReference("subdirectory");
+            var subdirectory = directory.GetDirectoryReference("subdirectory");
             var subBlob = CreateTempBlob(subdirectory);
 
             deleteAction(rootDirectoryName);
