@@ -2,7 +2,7 @@ Azure Blob Storage for Umbraco
 ==============================
 This code was inspired by Johannes Müller.
 
-I recomment another project: https://github.com/JimBobSquarePants/UmbracoFileSystemProviders.Azure
+Currently I recomment another project: https://github.com/JimBobSquarePants/UmbracoFileSystemProviders.Azure
 You find an Umbraco package here: https://our.umbraco.org/projects/collaboration/umbracofilesystemprovidersazure/
 Or use NuGet package: https://www.nuget.org/packages/UmbracoFileSystemProviders.Azure/
 
