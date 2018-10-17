@@ -36,4 +36,4 @@ http://www.amazon.de/Programming-Windows-Azure-Sriram-Krishnan-ebook/dp/B0043M58
 
 Regret
 -------
-Sorry, but I deleted the repository inadvertently. I put the main data back on github. However, the forks are no longer connect to main repo (upstream) and the issues are gone. 
+Sorry, but I deleted the repository inadvertently. I put the main data back on github. However, the forks are no longer connected to main repo (upstream) and the issues are gone. 
